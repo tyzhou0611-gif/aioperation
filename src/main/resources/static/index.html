@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI-Ops Platform</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+        }
+        .container { text-align: center; padding: 2rem; }
+        h1 { font-size: 3rem; margin-bottom: 1rem; }
+        p { font-size: 1.2rem; opacity: 0.9; margin-bottom: 2rem; }
+        .status {
+            display: inline-block;
+            padding: 0.5rem 1.5rem;
+            border: 2px solid rgba(255,255,255,0.5);
+            border-radius: 50px;
+            font-size: 0.9rem;
+        }
+        .api-link {
+            display: inline-block;
+            margin-top: 1rem;
+            color: rgba(255,255,255,0.8);
+            text-decoration: underline;
+            cursor: pointer;
+        }
+        .badge {
+            display: inline-block;
+            background: rgba(255,255,255,0.15);
+            padding: 0.25rem 0.75rem;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            margin-top: 2rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🚀 AI-Ops Platform</h1>
+        <p>后端服务已启动 — 等待Vue前端构建部署</p>
+        <div class="status">🟢 Backend API Running</div>
+        <br/>
+        <div class="badge">运行以下命令构建前端后方可访问完整应用</div>
+        <pre style="margin-top:1rem; background:rgba(0,0,0,0.3); padding:1rem; border-radius:8px; font-size:0.9rem;">
+cd frontend
+npm install
+npm run build
+        </pre>
+        <div style="margin-top:1rem;">
+            <span class="api-link" onclick="fetch('/api/auth/login', {method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({username:'admin',password:'123456'})}).then(r=>r.json()).then(d=>document.getElementById('api-result').textContent=JSON.stringify(d,null,2)).catch(e=>document.getElementById('api-result').textContent='API Error: '+e)">
+                ▶ 测试API登录
+            </span>
+        </div>
+        <pre id="api-result" style="margin-top:1rem; background:rgba(0,0,0,0.3); padding:1rem; border-radius:8px; font-size:0.8rem; text-align:left; max-width:500px; overflow:auto;"></pre>
+        <div style="margin-top:1rem;">
+            <a href="/h2-console" style="color:rgba(255,255,255,0.8); font-size:0.9rem;">H2 Database Console</a>
+        </div>
+    </div>
+</body>
+</html>

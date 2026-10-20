@@ -1,0 +1,11 @@
+API Version: 1
+
+providers:
+  - name: 'AI-Ops Dashboards'
+    orgId: 1
+    folder: 'AI-Ops'
+    type: file
+    disableDeletion: false
+    editable: true
+    options:
+      path: /etc/grafana/provisioning/dashboards

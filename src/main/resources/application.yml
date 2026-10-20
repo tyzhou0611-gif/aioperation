@@ -1,0 +1,170 @@
+# =============================================================================
+# AI-Ops Platform - 主配置文件
+# 黑盒部署原则：一个Jar包包含前后端所有代码
+# 多环境支持：通过 spring.profiles.active 切换 dev / prod
+# =============================================================================
+
+spring:
+  profiles:
+    active: dev
+
+  # ==========================================================================
+  # 数据源配置
+  # 默认：H2文件持久化模式（开发环境零配置启动）
+  #
+  # 生产环境切换MySQL（通过环境变量覆盖）：
+  #   SPRING_DATASOURCE_URL=jdbc:mysql://localhost:3306/aiops?useSSL=false&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true
+  #   SPRING_DATASOURCE_USERNAME=root
+  #   SPRING_DATASOURCE_PASSWORD=yourpassword
+  #   SPRING_DATASOURCE_DRIVER_CLASS_NAME=com.mysql.cj.jdbc.Driver
+  # ==========================================================================
+  datasource:
+    url: jdbc:h2:file:./data/aiops;DB_CLOSE_ON_EXIT=FALSE;AUTO_RECONNECT=TRUE;MODE=MySQL
+    driver-class-name: org.h2.Driver
+    username: sa
+    password:
+
+  # ==========================================================================
+  # JPA / Hibernate 配置
+  # ddl-auto: none  → 使用 schema.sql / data.sql 手动管理DDL
+  # ==========================================================================
+  jpa:
+    hibernate:
+      ddl-auto: none
+    show-sql: true
+    open-in-view: false
+    properties:
+      hibernate:
+        format_sql: true
+        # H2兼容MySQL模式
+        dialect: org.hibernate.dialect.H2Dialect
+
+  # ==========================================================================
+  # SQL 初始化（启动时自动建表+插入默认数据）
+  # ==========================================================================
+  sql:
+    init:
+      mode: always
+      schema-locations: classpath:schema.sql
+      data-locations: classpath:data.sql
+      continue-on-error: true
+      encoding: UTF-8
+
+  # ==========================================================================
+  # 缓存配置
+  # 默认：Caffeine本地缓存（最大10000条，1小时过期）
+  #
+  # 生产环境切换Redis（取消下方注释，注释掉Caffeine配置）：
+  #   spring:
+  #     redis:
+  #       host: ${REDIS_HOST:localhost}
+  #       port: ${REDIS_PORT:6379}
+  #       password: ${REDIS_PASSWORD:}
+  #       timeout: 5000
+  #       lettuce:
+  #         pool:
+  #           max-active: 8
+  #           max-idle: 8
+  #           min-idle: 0
+  #     cache:
+  #       type: redis
+  #       redis:
+  #         time-to-live: 3600000
+  #         cache-null-values: false
+  # ==========================================================================
+  cache:
+    type: caffeine
+    caffeine:
+      spec: maximumSize=10000,expireAfterWrite=3600s
+
+  # H2 Web Console（仅开发环境启用）
+  h2:
+    console:
+      enabled: true
+      path: /h2-console
+
+# =============================================================================
+# 服务器配置
+# =============================================================================
+server:
+  port: 8181
+  servlet:
+    context-path: /
+    encoding:
+      charset: UTF-8
+      enabled: true
+      force: true
+
+# =============================================================================
+# Actuator 配置（暴露 Prometheus 端点供外接 Prometheus 抓取）
+# =============================================================================
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,prometheus
+  metrics:
+    export:
+      prometheus:
+        enabled: true
+    tags:
+      application: aiops
+
+# =============================================================================
+# 可插拔指标源与外部系统配置
+# =============================================================================
+app:
+  metrics:
+    source: prometheus         # 指标源: default(本地模拟) 或 prometheus(外部Prometheus)
+  prometheus:
+    url: http://192.168.114.57:9090 # 外部 Prometheus 服务地址
+  grafana:
+    url: http://192.168.114.57:3000 # 外部 Grafana 服务地址
+    username: admin                 # Grafana 登录账号
+    password: easipass              # Grafana 登录密码
+    api-key: ${GRAFANA_API_KEY:}  # 可选，Grafana API Key
+  log:
+    source: default            # 日志源: default(模拟) / loki / elasticsearch
+  ai:
+    provider: openai           # AI: none/hiagent/openai/deepseek/qwen（走 OpenAI 兼容网关）
+    api-key: ${AI_API_KEY:sk-2OaQun9NGF5iDvfDheRyodei3w5L4Gz8G96MMtWt35hFv9T6}
+    api-url: ${AI_API_URL:http://192.168.73.192:3000/v1/chat/completions}
+    model: ${AI_MODEL:qwen3.8-flash}   # 可选: qwen3.8-flash / deepseek-v4-flash-0731 / glm-5.2
+    embedding:
+      provider: keyword        # keyword(黑盒默认,BM25) / openai / local-onnx
+    hiagent:                   # 公司内网 HiAgent（抓包协议）
+      base-url: http://192.168.121.245:32300
+      app-id: d6p2n16lvndd2j7hjvug
+      chat-path: /api/bypass/app/
+      version: "2023-08-01"
+      action: ChatQueryHomeBot
+      chat-page: /product/llm/llm-chat
+      timeout: 60000
+      stream: true
+      visitor-key: ${HIAGENT_VISITOR_KEY:}   # 可选手动指定 app-visitor-key
+      cookie: ${HIAGENT_COOKIE:}             # 可选：抓包整段 Cookie（含已登录会话），配了则跳过握手
+      csrf: ${HIAGENT_CSRF:}                 # 可选：抓包 x-csrf-token，配了则直接用
+      enable-fallback: true
+  notification:
+    enabled: true              # 通知开关
+
+# =============================================================================
+# 安全：SSH 密码 AES-256 加密密钥（生产用环境变量 AES_KEY 覆盖）
+# =============================================================================
+app.security:
+  aes-key: ${AES_KEY:aiops-default-aes-key-change-me}
+
+# =============================================================================
+# JWT 配置
+# =============================================================================
+jwt:
+  secret: YU9wc1BsYXRmb3JtU2VjcmV0S2V5Rm9ySldUVG9rZW5HZW5lcmF0aW9uMjAyNAo=
+  expiration: 86400000  # 24小时
+
+# =============================================================================
+# 日志配置
+# =============================================================================
+logging:
+  level:
+    com.aiops: DEBUG
+    org.springframework.security: DEBUG

@@ -1,0 +1,66 @@
+# =============================================================================
+# 生产环境配置
+# =============================================================================
+spring:
+  # --- 数据源（生产环境推荐使用MySQL） ---
+  # 方式一：通过环境变量切换（推荐）
+  #   set SPRING_DATASOURCE_URL=jdbc:mysql://localhost:3306/aiops?useSSL=false&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true
+  #   set SPRING_DATASOURCE_USERNAME=root
+  #   set SPRING_DATASOURCE_PASSWORD=yourpassword
+  #   set SPRING_DATASOURCE_DRIVER_CLASS_NAME=com.mysql.cj.jdbc.Driver
+  #
+  # 方式二：取消下方注释，直接修改为MySQL配置
+  # datasource:
+  #   url: jdbc:mysql://localhost:3306/aiops?useSSL=false&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true&characterEncoding=utf-8
+  #   driver-class-name: com.mysql.cj.jdbc.Driver
+  #   username: root
+  #   password: yourpassword
+
+  # 默认仍使用H2（安全兜底）
+  datasource:
+    url: jdbc:h2:file:./data/aiops;DB_CLOSE_ON_EXIT=FALSE;AUTO_RECONNECT=TRUE;MODE=MySQL
+    driver-class-name: org.h2.Driver
+
+  jpa:
+    show-sql: false
+    properties:
+      hibernate:
+        format_sql: false
+    # 生产环境使用MySQL时取消注释：
+    # properties:
+    #   hibernate:
+    #     dialect: org.hibernate.dialect.MySQLDialect
+
+  # H2 Console 生产环境关闭
+  h2:
+    console:
+      enabled: false
+
+  # --- 缓存（生产环境推荐使用Redis） ---
+  # 取消下方注释并使用Redis：
+  # redis:
+  #   host: ${REDIS_HOST:localhost}
+  #   port: ${REDIS_PORT:6379}
+  #   password: ${REDIS_PASSWORD:}
+  #   timeout: 5000
+  #   lettuce:
+  #     pool:
+  #       max-active: 8
+  #       max-idle: 8
+  #       min-idle: 0
+  # cache:
+  #   type: redis
+  #   redis:
+  #     time-to-live: 3600000
+  #     cache-null-values: false
+
+  # 默认使用Caffeine
+  cache:
+    type: caffeine
+    caffeine:
+      spec: maximumSize=10000,expireAfterWrite=3600s
+
+logging:
+  level:
+    com.aiops: INFO
+    org.springframework.security: INFO
