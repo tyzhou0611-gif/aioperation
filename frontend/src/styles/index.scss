@@ -1,0 +1,157 @@
+@use './variables.scss' as *;
+
+// ==================== 通用布局 ====================
+* {
+  box-sizing: border-box;
+}
+
+html, body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+}
+
+// ==================== 登录页 ====================
+.login-container {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+
+  .login-card {
+    width: 420px;
+    padding: 40px;
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+
+    .login-title {
+      text-align: center;
+      font-size: 24px;
+      font-weight: 700;
+      color: #333;
+      margin-bottom: 8px;
+    }
+    .login-subtitle {
+      text-align: center;
+      font-size: 14px;
+      color: #999;
+      margin-bottom: 32px;
+    }
+    .login-btn {
+      width: 100%;
+    }
+  }
+}
+
+// ==================== 后台布局 ====================
+.app-wrapper {
+  height: 100vh;
+  display: flex;
+  overflow: hidden;
+}
+
+.sidebar-container {
+  width: $sidebar-width;
+  height: 100vh;
+  background: $sidebar-bg;
+  flex-shrink: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+  transition: width 0.28s;
+
+  .sidebar-logo {
+    height: $navbar-height;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    font-size: 18px;
+    font-weight: 700;
+    background: rgba(0, 0, 0, 0.2);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    letter-spacing: 1px;
+  }
+
+  .el-menu {
+    border-right: none;
+    background: transparent !important;
+  }
+
+  .el-menu-item,
+  .el-sub-menu__title {
+    color: $sidebar-text !important;
+
+    &:hover {
+      background: rgba(255, 255, 255, 0.05) !important;
+    }
+
+    &.is-active {
+      color: $sidebar-active-text !important;
+      background: rgba(64, 158, 255, 0.15) !important;
+    }
+  }
+
+  .el-sub-menu__title .icon,
+  .el-menu-item .icon {
+    margin-right: 8px;
+    font-size: 16px;
+  }
+}
+
+.main-container {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.navbar {
+  height: $navbar-height;
+  background: #fff;
+  border-bottom: 1px solid #e6e6e6;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  padding: 0 20px;
+  flex-shrink: 0;
+
+  .navbar-right {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+
+    .username {
+      font-size: 14px;
+      color: #333;
+    }
+  }
+}
+
+.app-main {
+  flex: 1;
+  padding: 20px;
+  background: #f0f2f5;
+  overflow-y: auto;
+}
+
+// ==================== 仪表盘 ====================
+.dashboard {
+  h2 {
+    margin: 0 0 20px;
+    font-size: 22px;
+    color: #333;
+  }
+
+  .welcome-card {
+    margin-bottom: 20px;
+  }
+
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 16px;
+    margin-bottom: 20px;
+  }
+}

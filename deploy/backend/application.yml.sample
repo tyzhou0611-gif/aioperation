@@ -1,0 +1,113 @@
+# =============================================================================
+# AI-Ops Platform 后端外置配置样例（2026-10-26）
+# 复制为同目录 application.yml 后按需修改；Spring Boot 会自动优先加载。
+# 优先级：./config/application.yml > ./application.yml > jar 内 application.yml
+#
+# 可集成项（AI、Prometheus、Grafana）均可留空，登录后在【系统设置】中配置，
+# 保存到数据库 sys_config 后即时生效，无需修改本文件或重启。
+# 敏感项（AI API Key、各类密码）不建议写入本文件，页面录入后 AES 加密存储。
+# =============================================================================
+server:
+  port: 8181
+  servlet:
+    context-path: /
+    encoding:
+      charset: UTF-8
+      enabled: true
+      force: true
+
+spring:
+  profiles:
+    active: prod
+
+  # 数据源：默认 MySQL，可用环境变量覆盖
+  datasource:
+    url: ${DB_URL:jdbc:mysql://127.0.0.1:3306/aiops?useSSL=false&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true&characterEncoding=utf8}
+    driver-class-name: ${DB_DRIVER:com.mysql.cj.jdbc.Driver}
+    username: ${DB_USERNAME:aiops}
+    password: ${DB_PASSWORD:}
+
+  jpa:
+    hibernate:
+      ddl-auto: none
+    show-sql: false
+    open-in-view: false
+
+  # 生产环境关闭 H2 Web 控制台
+  h2:
+    console:
+      enabled: false
+
+  cache:
+    type: caffeine
+    caffeine:
+      spec: maximumSize=10000,expireAfterWrite=3600s
+
+app:
+  # 单进程部署：springBoot.sh 检测到 ./web/index.html 会自动追加该参数
+  frontend:
+    dir: ${FRONTEND_DIR:}
+
+  # CORS：同源 Nginx 反向代理无需配置；前端跨域直连时填写来源
+  cors:
+    allowed-origin-patterns: ${CORS_ALLOWED_ORIGIN_PATTERNS:http://localhost:*,http://127.0.0.1:*}
+
+  # 指标源与外部系统（也可在【系统设置 → 外部数据源】修改，保存即生效）
+  metrics:
+    source: ${METRICS_SOURCE:prometheus}
+    sample:
+      retention-days: ${METRIC_SAMPLE_RETENTION_DAYS:30}
+  prometheus:
+    # embedded=使用随包内置的 prometheus/linux-amd64；external=对接外部 Prometheus
+    mode: ${PROMETHEUS_MODE:embedded}
+    url: ${PROMETHEUS_URL:http://127.0.0.1:9090}
+    embedded:
+      enabled: ${PROMETHEUS_EMBEDDED_ENABLED:true}
+      binary-dir: ${PROMETHEUS_BINARY_DIR:./prometheus}
+      data-dir: ${PROMETHEUS_DATA_DIR:./data/prometheus}
+      config-file: ${PROMETHEUS_CONFIG_FILE:./data/prometheus/prometheus.yml}
+      port: ${PROMETHEUS_PORT:9090}
+      listen-address: ${PROMETHEUS_LISTEN_ADDRESS:0.0.0.0}
+      retention: ${PROMETHEUS_RETENTION:15d}
+      public-url: ${PROMETHEUS_PUBLIC_URL:}
+  grafana:
+    url: ${GRAFANA_URL:}
+
+  # 服务器状态来源：auto(Prometheus 优先 + SSH/TCP/ICMP 兜底，推荐) / prometheus / ssh / icmp
+  server:
+    status-source: ${SERVER_STATUS_SOURCE:auto}
+
+  # Prometheus Exporter 一键安装：管理员在【服务器管理 → Agent 安装】上传离线包
+  agents:
+    package-dir: ${AGENT_PACKAGE_DIR:./data/agent-packages}
+    # 配置后 Prometheus 调用 /api/monitor/targets?token=xxx；留空则内网匿名可访问
+    sd-token: ${AGENT_SD_TOKEN:}
+
+  # FTP 资产：从 FTP/SFTP 拉取到平台本地暂存，再分发到受管服务器
+  ftp:
+    staging-dir: ${FTP_STAGING_DIR:./data/ftp-staging}
+
+  # AI 配置：API Key 建议留空，启动后在【系统设置 → AI 服务】录入（加密存储、页面不回显）
+  ai:
+    provider: ${AI_PROVIDER:anthropic}
+    api-key: ${ANTHROPIC_AUTH_TOKEN:}
+    api-url: ${ANTHROPIC_BASE_URL:http://192.0.2.11:3000}
+    model: ${AI_MODEL:deepseek-v4.1-flash-1017}
+    hiagent:
+      mode: ${HIAGENT_MODE:openapi}          # openapi(推荐) / bypass(抓包 Cookie)
+      openapi-url: ${HIAGENT_OPENAPI_URL:http://192.0.2.10:32300/api/proxy/api/v1}
+      openapi-key: ${HIAGENT_OPENAPI_KEY:}
+      user-id: ${HIAGENT_USER_ID:aiops}
+      base-url: ${HIAGENT_BASE_URL:http://192.0.2.10:32300}
+      app-id: ${HIAGENT_APP_ID:}
+
+  # 敏感配置加密密钥：生产环境必须设置；首次启动前设好，之后更换需重新录入所有密码/Key
+  security:
+    aes-key: ${AES_KEY}
+
+logging:
+  file:
+    path: ${LOG_DIR:logs}
+  level:
+    com.aiops: ${APP_LOG_LEVEL:INFO}
+    org.springframework.security: INFO

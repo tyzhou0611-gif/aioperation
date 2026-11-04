@@ -1,0 +1,163 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="1000" viewBox="0 0 1600 1000">
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#64748b"/>
+    </marker>
+    <marker id="arrowBlue" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#2563eb"/>
+    </marker>
+    <linearGradient id="appBg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#eff6ff"/>
+      <stop offset="100%" stop-color="#e0ecff"/>
+    </linearGradient>
+    <linearGradient id="extBg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#fff7ed"/>
+      <stop offset="100%" stop-color="#ffedd5"/>
+    </linearGradient>
+    <style>
+      text { font-family: "Microsoft YaHei", "PingFang SC", "Noto Sans CJK SC", sans-serif; fill: #1f2937; }
+      .title { font-size: 32px; font-weight: 700; fill: #0f172a; }
+      .subtitle { font-size: 15px; fill: #64748b; }
+      .group-title { font-size: 18px; font-weight: 700; fill: #1e3a8a; }
+      .box-title { font-size: 16px; font-weight: 700; }
+      .box-text { font-size: 13px; fill: #475569; }
+      .small { font-size: 12px; fill: #64748b; }
+      .label { font-size: 12px; fill: #475569; }
+      .box { fill: #ffffff; stroke: #cbd5e1; stroke-width: 1.5; }
+      .box-dashed { fill: #ffffff; stroke: #94a3b8; stroke-width: 1.5; stroke-dasharray: 6 4; }
+      .app { fill: url(#appBg); stroke: #3b82f6; stroke-width: 2; }
+      .ext { fill: url(#extBg); stroke: #f59e0b; stroke-width: 2; }
+      .data { fill: #ecfdf5; stroke: #10b981; stroke-width: 2; }
+      .log { fill: #f8fafc; stroke: #94a3b8; stroke-width: 1.5; stroke-dasharray: 6 4; }
+      .line { stroke: #64748b; stroke-width: 2; fill: none; marker-end: url(#arrow); }
+      .line-blue { stroke: #2563eb; stroke-width: 2.5; fill: none; marker-end: url(#arrowBlue); }
+      .line-dash { stroke: #94a3b8; stroke-width: 1.5; stroke-dasharray: 6 5; fill: none; marker-end: url(#arrow); }
+    </style>
+  </defs>
+
+  <rect x="0" y="0" width="1600" height="1000" fill="#f8fafc"/>
+  <text class="title" x="60" y="58">AI-Ops Platform v1.0 总体架构</text>
+  <text class="subtitle" x="60" y="88">单租户 · 私有化/内网部署 · 模块化单体 + 前后端分离 + Provider 适配</text>
+
+  <!-- 用户 -->
+  <rect class="box" x="40" y="300" width="200" height="140" rx="14"/>
+  <text class="box-title" x="140" y="340" text-anchor="middle">运维人员 / 管理员</text>
+  <text class="box-text" x="140" y="370" text-anchor="middle">浏览器 Chrome / Edge</text>
+  <text class="box-text" x="140" y="394" text-anchor="middle">Vue3 SPA + xterm</text>
+  <text class="small" x="140" y="420" text-anchor="middle">HTTPS / WSS</text>
+
+  <!-- Nginx -->
+  <rect class="box-dashed" x="300" y="300" width="210" height="140" rx="14"/>
+  <text class="box-title" x="405" y="340" text-anchor="middle">Nginx（可选）</text>
+  <text class="box-text" x="405" y="370" text-anchor="middle">静态资源</text>
+  <text class="box-text" x="405" y="394" text-anchor="middle">/api 反向代理</text>
+  <text class="box-text" x="405" y="418" text-anchor="middle">/ws Upgrade + 长超时</text>
+
+  <!-- 应用 -->
+  <rect class="app" x="570" y="130" width="490" height="620" rx="18"/>
+  <text class="group-title" x="815" y="172" text-anchor="middle">Spring Boot 应用（JDK 8，:8181）</text>
+  <text class="small" x="815" y="194" text-anchor="middle">单 Jar 可同时托管 web/ 静态资源</text>
+
+  <rect class="box" x="595" y="210" width="440" height="66" rx="10"/>
+  <text class="box-title" x="815" y="238" text-anchor="middle">接口层（32 Controllers）</text>
+  <text class="box-text" x="815" y="260" text-anchor="middle">REST /api/**　·　WebSocket /ws/exec、/ws/ssh</text>
+
+  <rect class="box" x="595" y="292" width="440" height="126" rx="10"/>
+  <text class="box-title" x="815" y="318" text-anchor="middle">业务服务层（31 Services）</text>
+  <text class="box-text" x="815" y="344" text-anchor="middle">资产管理 / 拓扑 / 监控告警 / 智能诊断 / AI Copilot</text>
+  <text class="box-text" x="815" y="366" text-anchor="middle">运维执行 / Web SSH / ELK / SQL 工作台 / 知识库</text>
+  <text class="box-text" x="815" y="388" text-anchor="middle">项目权限 / 审计 / 配置管理</text>
+
+  <rect class="box" x="595" y="434" width="440" height="130" rx="10"/>
+  <text class="box-title" x="815" y="460" text-anchor="middle">基础设施适配层（Provider）</text>
+  <text class="box-text" x="815" y="486" text-anchor="middle">MetricsProvider（Prometheus / Local）</text>
+  <text class="box-text" x="815" y="508" text-anchor="middle">LogProvider（Local / Loki / ES 预留）</text>
+  <text class="box-text" x="815" y="530" text-anchor="middle">AiChatClient（Anthropic / OpenAI / HiAgent）</text>
+  <text class="box-text" x="815" y="552" text-anchor="middle">SSH（JSch 0.2.20）· HTTP Clients</text>
+
+  <rect class="box" x="595" y="580" width="440" height="140" rx="10"/>
+  <text class="box-title" x="815" y="606" text-anchor="middle">安全与治理</text>
+  <text class="box-text" x="815" y="632" text-anchor="middle">JWT 认证 · RBAC · 项目级资产权限</text>
+  <text class="box-text" x="815" y="654" text-anchor="middle">AES-256 敏感配置加密 · 接口脱敏</text>
+  <text class="box-text" x="815" y="676" text-anchor="middle">危险命令黑名单 / dry-run · 审计日志</text>
+  <text class="box-text" x="815" y="698" text-anchor="middle">ConfigService：DB 配置热生效</text>
+
+  <!-- 数据 & 日志 -->
+  <ellipse cx="790" cy="812" rx="170" ry="16" fill="#d1fae5" stroke="#10b981" stroke-width="2"/>
+  <rect class="data" x="620" y="812" width="340" height="96" rx="0"/>
+  <ellipse cx="790" cy="908" rx="170" ry="16" fill="#d1fae5" stroke="#10b981" stroke-width="2"/>
+  <text class="box-title" x="790" y="850" text-anchor="middle">MySQL 8</text>
+  <text class="box-text" x="790" y="876" text-anchor="middle">业务数据 · 权限 · sys_config</text>
+  <text class="small" x="790" y="896" text-anchor="middle">31 张表 · 每日备份</text>
+
+  <rect class="log" x="250" y="812" width="260" height="96" rx="12"/>
+  <text class="box-title" x="380" y="848" text-anchor="middle">logs/aiops.log</text>
+  <text class="box-text" x="380" y="874" text-anchor="middle">UTF-8 · 按天/50MB 滚动</text>
+  <text class="small" x="380" y="894" text-anchor="middle">保留 30 天 · 总量 ≤2GB</text>
+
+  <!-- 外部系统 -->
+  <rect class="ext" x="1110" y="130" width="440" height="580" rx="18"/>
+  <text class="group-title" x="1330" y="170" text-anchor="middle" fill="#9a3412">外部系统（适配接入）</text>
+  <text class="small" x="1330" y="192" text-anchor="middle">地址/凭据可在页面配置</text>
+
+  <rect class="box" x="1135" y="210" width="390" height="52" rx="9"/>
+  <text class="box-title" x="1155" y="233">Prometheus 2.x</text>
+  <text class="box-text" x="1155" y="252">指标查询 /api/v1/query(_range)</text>
+
+  <rect class="box-dashed" x="1135" y="276" width="390" height="52" rx="9"/>
+  <text class="box-title" x="1155" y="299">Grafana（可选）</text>
+  <text class="box-text" x="1155" y="318">兼容旧看板 / 同源代理</text>
+
+  <rect class="box" x="1135" y="342" width="390" height="52" rx="9"/>
+  <text class="box-title" x="1155" y="365">Elasticsearch 7.x</text>
+  <text class="box-text" x="1155" y="384">索引 / 检索 / 集群分片（Basic Auth）</text>
+
+  <rect class="box" x="1135" y="408" width="390" height="52" rx="9"/>
+  <text class="box-title" x="1155" y="431">大模型网关</text>
+  <text class="box-text" x="1155" y="450">Anthropic / OpenAI 兼容 / HiAgent</text>
+
+  <rect class="box" x="1135" y="474" width="390" height="52" rx="9"/>
+  <text class="box-title" x="1155" y="497">Hadoop YARN ResourceManager</text>
+  <text class="box-text" x="1155" y="516">集群 / 节点 / 应用 REST</text>
+
+  <rect class="box" x="1135" y="540" width="390" height="52" rx="9"/>
+  <text class="box-title" x="1155" y="563">SMTP / 钉钉 / 企业微信</text>
+  <text class="box-text" x="1155" y="582">告警通知（按环境验证）</text>
+
+  <rect class="box" x="1135" y="606" width="390" height="72" rx="9"/>
+  <text class="box-title" x="1155" y="631">SSH 目标服务器（Linux）</text>
+  <text class="box-text" x="1155" y="652">密码/私钥 · 命令执行 · Web SSH 终端</text>
+  <text class="small" x="1155" y="670">JSch 0.2.20（rsa-sha2 / curve25519）</text>
+
+  <!-- 连线 -->
+  <line class="line" x1="240" y1="370" x2="300" y2="370"/>
+  <line class="line" x1="510" y1="370" x2="570" y2="370"/>
+  <text class="label" x="258" y="360">HTTPS</text>
+  <text class="label" x="516" y="360">/api /ws</text>
+
+  <line class="line-blue" x1="790" y1="750" x2="790" y2="812"/>
+  <text class="label" x="800" y="786">JDBC</text>
+
+  <line class="line-dash" x1="640" y1="750" x2="430" y2="812"/>
+  <text class="label" x="500" y="782">日志写入</text>
+
+  <!-- 外部调用总线 -->
+  <line class="line" x1="1060" y1="400" x2="1088" y2="400"/>
+  <line class="line" x1="1088" y1="236" x2="1088" y2="646"/>
+  <line class="line" x1="1088" y1="236" x2="1135" y2="236"/>
+  <line class="line-dash" x1="1088" y1="302" x2="1135" y2="302"/>
+  <line class="line" x1="1088" y1="368" x2="1135" y2="368"/>
+  <line class="line" x1="1088" y1="434" x2="1135" y2="434"/>
+  <line class="line" x1="1088" y1="500" x2="1135" y2="500"/>
+  <line class="line" x1="1088" y1="566" x2="1135" y2="566"/>
+  <line class="line" x1="1088" y1="646" x2="1135" y2="646"/>
+  <text class="label" x="992" y="388">HTTP / REST</text>
+  <text class="label" x="1044" y="676">SSH</text>
+
+  <!-- 图例 -->
+  <line class="line" x1="60" y1="900" x2="100" y2="900"/>
+  <text class="label" x="110" y="905">同步调用（REST / JDBC / SSH）</text>
+  <line class="line-dash" x1="330" y1="900" x2="370" y2="900"/>
+  <text class="label" x="380" y="905">可选 / 降级 / 异步</text>
+  <text class="small" x="60" y="940">说明：AI 不可用时回退本地规则；Prometheus/ES 不可用时页面明确报错或部分数据，不伪造指标；Grafana、HiAgent、YARN 为可选集成。</text>
+</svg>

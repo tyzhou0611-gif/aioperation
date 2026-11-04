@@ -1,0 +1,30 @@
+# =============================================================================
+# Prometheus 配置 - AI-Ops Platform 自动抓取
+# 此文件由 optional-docker-compose.yml 挂载使用
+# =============================================================================
+
+global:
+  scrape_interval: 15s      # 全局抓取间隔
+  evaluation_interval: 15s  # 规则评估间隔
+  scrape_timeout: 10s
+
+# 抓取目标配置
+scrape_configs:
+
+  # 1. AI-Ops 平台自身指标（Micrometer -> /actuator/prometheus）
+  - job_name: 'aiops-platform'
+    metrics_path: '/actuator/prometheus'
+    static_configs:
+      - targets: ['host.docker.internal:8080']   # Docker 访问宿主机
+        labels:
+          application: 'aiops'
+          env: 'production'
+
+  # 2. Node Exporter（Linux 服务器指标，需在被监控机器上安装）
+  # 安装命令: node_exporter --web.listen-address=:9100
+  - job_name: 'node-exporter'
+    static_configs:
+      - targets:
+          - 'host.docker.internal:9100'   # 宿主机指标（如果安装了 node_exporter）
+        labels:
+          env: 'production'

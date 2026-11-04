@@ -1,0 +1,52 @@
+{
+  "annotations": {"list": []},
+  "editable": true,
+  "graphTooltip": 1,
+  "id": null,
+  "links": [],
+  "panels": [
+    {"type":"timeseries","title":"CPU 使用率 (%)","gridPos":{"h":8,"w":12,"x":0,"y":0},
+     "datasource":{"type":"prometheus","uid":"${DS_PROM}"},
+     "targets":[{"expr":"100 * (1 - avg by(instance)(rate(node_cpu_seconds_total{mode=\"idle\",instance=~\"$node\"}[5m])))","legendFormat":"{{instance}}"}],
+     "fieldConfig":{"defaults":{"unit":"percent","min":0,"max":100,"custom":{"fillOpacity":10}},"overrides":[]},
+     "options":{"legend":{"displayMode":"list"}}},
+    {"type":"gauge","title":"内存使用率","gridPos":{"h":8,"w":6,"x":12,"y":0},
+     "datasource":{"type":"prometheus","uid":"${DS_PROM}"},
+     "targets":[{"expr":"100 * (1 - node_memory_MemAvailable_bytes{instance=~\"$node\"} / node_memory_MemTotal_bytes{instance=~\"$node\"})","legendFormat":"mem"}],
+     "fieldConfig":{"defaults":{"unit":"percent","min":0,"max":100,"thresholds":{"mode":"absolute","steps":[{"color":"green","value":null},{"color":"yellow","value":70},{"color":"red","value":90}]}},"overrides":[]}},
+    {"type":"gauge","title":"根磁盘使用率","gridPos":{"h":8,"w":6,"x":18,"y":0},
+     "datasource":{"type":"prometheus","uid":"${DS_PROM}"},
+     "targets":[{"expr":"100 * (1 - node_filesystem_avail_bytes{instance=~\"$node\",mountpoint=\"/\"} / node_filesystem_size_bytes{instance=~\"$node\",mountpoint=\"/\"})","legendFormat":"disk"}],
+     "fieldConfig":{"defaults":{"unit":"percent","min":0,"max":100,"thresholds":{"mode":"absolute","steps":[{"color":"green","value":null},{"color":"yellow","value":80},{"color":"red","value":95}]}},"overrides":[]}},
+    {"type":"timeseries","title":"网络流量 (bytes/s)","gridPos":{"h":8,"w":12,"x":0,"y":8},
+     "datasource":{"type":"prometheus","uid":"${DS_PROM}"},
+     "targets":[
+       {"expr":"rate(node_network_receive_bytes_total{instance=~\"$node\"}[5m])","legendFormat":"rx {{device}}"},
+       {"expr":"rate(node_network_transmit_bytes_total{instance=~\"$node\"}[5m])","legendFormat":"tx {{device}}"}],
+     "fieldConfig":{"defaults":{"unit":"Bps","custom":{"fillOpacity":10}},"overrides":[]}},
+    {"type":"timeseries","title":"负载 (Load Average)","gridPos":{"h":8,"w":12,"x":12,"y":8},
+     "datasource":{"type":"prometheus","uid":"${DS_PROM}"},
+     "targets":[
+       {"expr":"node_load1{instance=~\"$node\"}","legendFormat":"load1"},
+       {"expr":"node_load5{instance=~\"$node\"}","legendFormat":"load5"},
+       {"expr":"node_load15{instance=~\"$node\"}","legendFormat":"load15"}],
+     "fieldConfig":{"defaults":{"custom":{"fillOpacity":10}},"overrides":[]}},
+    {"type":"stat","title":"在线节点数","gridPos":{"h":4,"w":6,"x":0,"y":16},
+     "datasource":{"type":"prometheus","uid":"${DS_PROM}"},
+     "targets":[{"expr":"count(up{job=~\"node|node-exporter\"} == 1) or count(node_uname_info)"}],
+     "fieldConfig":{"defaults":{"unit":"short","thresholds":{"mode":"absolute","steps":[{"color":"green","value":null}]}},"overrides":[]}}
+  ],
+  "refresh": "30s",
+  "schemaVersion": 39,
+  "tags": ["aiops","node_exporter"],
+  "templating": {"list":[
+    {"name":"DS_PROM","label":"数据源","type":"datasource","query":"prometheus","current":{}},
+    {"name":"node","label":"实例","type":"query","datasource":{"type":"prometheus","uid":"${DS_PROM}"},
+     "query":"label_values(node_uname_info, instance)","refresh":2,"includeAll":true,"multi":true,"current":{"text":"All","value":"$__all"}}
+  ]},
+  "time": {"from":"now-6h","to":"now"},
+  "timezone":"browser",
+  "title":"AI-Ops 节点监控",
+  "uid":"aiops-node",
+  "version": 1
+}

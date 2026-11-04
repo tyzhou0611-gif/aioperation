@@ -1,0 +1,93 @@
+### Java ###
+*.class
+*.jar
+*.war
+*.nar
+*.ear
+*.zip
+*.tar.gz
+*.rar
+hs_err_pid*
+replay_pid*
+
+### Maven ###
+target/
+pom.xml.tag
+pom.xml.releaseBackup
+pom.xml.versionsBackup
+pom.xml.next
+release.properties
+dependency-reduced-pom.xml
+buildNumber.properties
+.mvn/timing.properties
+!/.mvn/wrapper/maven-wrapper.jar
+
+### IntelliJ IDEA ###
+.idea/
+*.iml
+*.iws
+*.ipr
+out/
+!**/src/main/**/out/
+!**/src/test/**/out/
+
+### Eclipse ###
+.apt_generated
+.classpath
+.factorypath
+.project
+.settings
+.springBeans
+.sts4-cache
+bin/
+!**/src/main/**/bin/
+!**/src/test/**/bin/
+
+### NetBeans ###
+/nbproject/private/
+/nbbuild/
+/dist/
+/nbdist/
+/.nb-gradle/
+build/
+!**/src/main/**/build/
+!**/src/test/**/build/
+
+### VS Code ###
+.vscode/
+
+### Mac OS ###
+.DS_Store
+
+### Node / Frontend ###
+frontend/node_modules/
+frontend/dist/
+frontend/.vite/
+
+### H2 database files ###
+data/
+
+### Logs ###
+*.log
+logs/
+
+### Local private information (never publish) ###
+/.private/
+/.local/
+/application.yml
+/application.yml.migrated
+/database/
+/frontend/.env
+/deploy/.yml
+*.pem
+*.key
+*.p12
+*.pfx
+
+# Local environment and credential material
+.env
+.env.*
+!.env.example
+!frontend/.env.example
+!frontend/.env.production
+*.bundle

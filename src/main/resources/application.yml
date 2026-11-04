@@ -1,0 +1,226 @@
+# =============================================================================
+# AI-Ops Platform - 主配置文件
+# 黑盒部署原则：一个Jar包包含前后端所有代码
+# 多环境支持：通过 spring.profiles.active 切换 dev / prod
+# =============================================================================
+
+spring:
+  profiles:
+    active: dev
+
+  # 知识库 Obsidian vault zip / 多文件导入
+  servlet:
+    multipart:
+      max-file-size: 200MB
+      max-request-size: 250MB
+
+  # ==========================================================================
+  # 数据源配置：默认使用本机 MySQL（数据持久化，不再依赖 ./data/*.mv.db）
+  # 可用环境变量覆盖：DB_URL / DB_USERNAME / DB_PASSWORD
+  # 如需回到 H2：--spring.profiles.active=h2
+  # ==========================================================================
+  datasource:
+    url: ${DB_URL:jdbc:mysql://127.0.0.1:3306/aiops?useSSL=false&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true&characterEncoding=utf8}
+    driver-class-name: ${DB_DRIVER:com.mysql.cj.jdbc.Driver}
+    username: ${DB_USERNAME:aiops}
+    password: ${DB_PASSWORD:}
+
+  # ==========================================================================
+  # JPA / Hibernate 配置
+  # ddl-auto: none  → 使用 schema.sql / data.sql 手动管理DDL
+  # ==========================================================================
+  jpa:
+    hibernate:
+      ddl-auto: none
+    show-sql: false
+    open-in-view: false
+    properties:
+      hibernate:
+        format_sql: false
+
+  # ==========================================================================
+  # SQL 初始化：MySQL 只自动建表/补表，不重复写入种子数据（避免覆盖业务数据）
+  # H2 profile 会覆盖为 data.sql
+  # ==========================================================================
+  sql:
+    init:
+      mode: always
+      schema-locations: classpath:schema.sql
+      data-locations: classpath:data-mysql.sql
+      continue-on-error: true
+      encoding: UTF-8
+
+  # ==========================================================================
+  # 缓存配置
+  # 默认：Caffeine本地缓存（最大10000条，1小时过期）
+  #
+  # 生产环境切换Redis（取消下方注释，注释掉Caffeine配置）：
+  #   spring:
+  #     redis:
+  #       host: ${REDIS_HOST:localhost}
+  #       port: ${REDIS_PORT:6379}
+  #       password: ${REDIS_PASSWORD:}
+  #       timeout: 5000
+  #       lettuce:
+  #         pool:
+  #           max-active: 8
+  #           max-idle: 8
+  #           min-idle: 0
+  #     cache:
+  #       type: redis
+  #       redis:
+  #         time-to-live: 3600000
+  #         cache-null-values: false
+  # ==========================================================================
+  cache:
+    type: caffeine
+    caffeine:
+      spec: maximumSize=10000,expireAfterWrite=3600s
+
+  # H2 Web Console（仅开发环境启用）
+  h2:
+    console:
+      enabled: true
+      path: /h2-console
+
+# =============================================================================
+# 服务器配置
+# =============================================================================
+server:
+  port: 8181
+  servlet:
+    context-path: /
+    encoding:
+      charset: UTF-8
+      enabled: true
+      force: true
+
+# =============================================================================
+# Actuator 配置（暴露 Prometheus 端点供外接 Prometheus 抓取）
+# =============================================================================
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,prometheus
+  metrics:
+    export:
+      prometheus:
+        enabled: true
+    tags:
+      application: aiops
+
+# =============================================================================
+# 可插拔指标源与外部系统配置
+# =============================================================================
+app:
+  # 单进程部署（无 Nginx）：指定前端 dist 目录，由后端直接托管页面
+  # 留空则仅提供 /api 接口（前后端分离模式）
+  frontend:
+    dir: ${FRONTEND_DIR:}
+  # Exporter 离线安装包目录与 Prometheus HTTP SD
+  agents:
+    package-dir: ${AGENT_PACKAGE_DIR:./data/agent-packages}
+    # 配置后 Prometheus 调用 /api/monitor/targets?token=xxx；留空则内网匿名可访问
+    sd-token: ${AGENT_SD_TOKEN:}
+  # 前后端分离：允许跨域的前端来源（逗号分隔，支持通配符）
+  # 同源 Nginx 反向代理部署时无需跨域；前端直连后端时在此放行前端域名。
+  # 生产环境建议通过环境变量覆盖为具体域名，例如 https://aiops.example.com
+  cors:
+    allowed-origin-patterns: ${CORS_ALLOWED_ORIGIN_PATTERNS:http://localhost:*,http://127.0.0.1:*,https://*}
+  metrics:
+    source: ${METRICS_SOURCE:prometheus}   # 指标源: default(本地模拟) / prometheus；亦可在系统设置中修改
+    sample:
+      retention-days: ${METRIC_SAMPLE_RETENTION_DAYS:30}   # Push 指标样本保留天数
+  # 服务器状态探测来源：auto(Prometheus 优先 + SSH/TCP/ICMP 兜底) / prometheus / ssh / icmp
+  server:
+    status-source: ${SERVER_STATUS_SOURCE:auto}
+  prometheus:
+    # embedded=使用随包内置 Prometheus；external=对接外部 Prometheus
+    mode: ${PROMETHEUS_MODE:embedded}
+    url: ${PROMETHEUS_URL:http://127.0.0.1:9090}
+    embedded:
+      enabled: ${PROMETHEUS_EMBEDDED_ENABLED:true}
+      binary-dir: ${PROMETHEUS_BINARY_DIR:./prometheus}
+      data-dir: ${PROMETHEUS_DATA_DIR:./data/prometheus}
+      config-file: ${PROMETHEUS_CONFIG_FILE:./data/prometheus/prometheus.yml}
+      port: ${PROMETHEUS_PORT:9090}
+      listen-address: ${PROMETHEUS_LISTEN_ADDRESS:0.0.0.0}
+      retention: ${PROMETHEUS_RETENTION:15d}
+      extra-args: ${PROMETHEUS_EXTRA_ARGS:}
+      public-url: ${PROMETHEUS_PUBLIC_URL:}
+  grafana:
+    url: ${GRAFANA_URL:}      # 可留空，页面可配
+    username: ${GRAFANA_USERNAME:}                      # 可选，不再内置默认口令
+    password: ${GRAFANA_PASSWORD:}
+    api-key: ${GRAFANA_API_KEY:}                        # 可选，Grafana API Key
+  log:
+    source: ${LOG_SOURCE:default}      # 日志源: default(本地表) / loki / elasticsearch（Loki/ES 接入预留）
+  ai:
+    provider: ${AI_PROVIDER:none}   # AI: anthropic/hiagent/openai/deepseek/qwen/none
+    # 注意：API Key 不再写入配置文件，请在【系统设置 → AI 配置】中填写（加密存储）
+    api-key: ${ANTHROPIC_AUTH_TOKEN:}
+    api-url: ${ANTHROPIC_BASE_URL:}
+    model: ${AI_MODEL:deepseek-v4.1-flash-1017}
+    anthropic:
+      version: "2023-06-01"
+      max-tokens: 4096
+    # 一次性迁移到新的 AI 网关（默认关闭；如需迁移，提供 bootstrap key 后临时启用）
+    bootstrap:
+      enabled: ${AI_BOOTSTRAP_ENABLED:false}
+      version: "2"
+      provider: anthropic
+      api-url: ${AI_BOOTSTRAP_URL:}
+      api-key: ${AI_BOOTSTRAP_API_KEY:}
+      model: deepseek-v4.1-flash-1017
+    embedding:
+      provider: keyword        # keyword(黑盒默认,BM25) / openai / local-onnx
+    hiagent:                   # 公司内网 HiAgent；可在页面覆盖
+      # openapi: 官方开放接口（chat_query + Apikey，推荐）；bypass: 旧抓包协议（需要登录 Cookie/CSRF）
+      mode: ${HIAGENT_MODE:openapi}
+      # 开放接口基础地址（只填到 /api/proxy/api/v1 即可，后端自动追加 /chat_query）
+      openapi-url: ${HIAGENT_OPENAPI_URL:}
+      openapi-key: ${HIAGENT_OPENAPI_KEY:}
+      user-id: ${HIAGENT_USER_ID:aiops}
+      base-url: ${HIAGENT_BASE_URL:}
+      app-id: ${HIAGENT_APP_ID:}
+      chat-path: /api/bypass/app/
+      version: "2023-08-01"
+      action: ChatQueryHomeBot
+      chat-page: /product/llm/llm-chat
+      timeout: 60000
+      stream: true
+      visitor-key: ${HIAGENT_VISITOR_KEY:}   # 可选手动指定 app-visitor-key
+      cookie: ${HIAGENT_COOKIE:}             # 可选：抓包整段 Cookie（含已登录会话），配了则跳过握手
+      csrf: ${HIAGENT_CSRF:}                 # 可选：抓包 x-csrf-token，配了则直接用
+      enable-fallback: true
+  notification:
+    enabled: true              # 通知开关
+
+# =============================================================================
+# 安全：SSH 密码 AES-256 加密密钥（生产用环境变量 AES_KEY 覆盖）
+# =============================================================================
+app.security:
+  aes-key: ${AES_KEY}
+
+# =============================================================================
+# JWT 配置
+# =============================================================================
+jwt:
+  secret: ${JWT_SECRET}
+  expiration: 86400000  # 24小时
+
+# =============================================================================
+# 日志配置
+# =============================================================================
+logging:
+  file:
+    path: ${LOG_DIR:logs}
+  level:
+    com.aiops: ${APP_LOG_LEVEL:INFO}
+    org.springframework.security: INFO
+  logback:
+    rollingpolicy:
+      max-file-size: 50MB
+      max-history: 30
+      total-size-cap: 2GB

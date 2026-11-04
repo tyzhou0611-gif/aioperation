@@ -1,0 +1,35 @@
+# =============================================================================
+# H2 备用 profile：默认数据源为 MySQL，本 profile 用于离线/测试环境
+# 启动：java -jar aiops-backend.jar --spring.profiles.active=h2
+# =============================================================================
+spring:
+  datasource:
+    url: jdbc:h2:file:./data/aiops;DB_CLOSE_ON_EXIT=FALSE;AUTO_RECONNECT=TRUE;MODE=MySQL
+    driver-class-name: org.h2.Driver
+    username: sa
+    password:
+
+  jpa:
+    database-platform: org.hibernate.dialect.H2Dialect
+    show-sql: false
+    properties:
+      hibernate:
+        format_sql: false
+
+  h2:
+    console:
+      enabled: true
+      path: /h2-console
+
+  sql:
+    init:
+      mode: always
+      schema-locations: classpath:schema.sql
+      data-locations: classpath:data.sql
+      continue-on-error: true
+      encoding: UTF-8
+
+logging:
+  level:
+    com.aiops: INFO
+    org.springframework.security: INFO
